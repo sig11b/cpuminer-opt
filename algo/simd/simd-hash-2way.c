@@ -240,6 +240,27 @@ do { \
     X(i) = v128_sub16( X(i), v ); \
 } while(0)
 
+#define BUTTERFLY_1( i,j ) \
+do { \
+    v128u16_t v = X(j); \
+    X(j) = v128_add16( X(i), X(j) ); \
+    X(i) = v128_sl16( v128_sub16( X(i), v ), 2 ); \
+} while(0)
+
+#define BUTTERFLY_2( i,j ) \
+do { \
+    v128u16_t v = X(j); \
+    X(j) = v128_add16( X(i), X(j) ); \
+    X(i) = v128_sl16( v128_sub16( X(i), v ), 4 ); \
+} while(0)
+
+#define BUTTERFLY_3( i,j ) \
+do { \
+    v128u16_t v = X(j); \
+    X(j) = v128_add16( X(i), X(j) ); \
+    X(i) = v128_sl16( v128_sub16( X(i), v ), 6 ); \
+} while(0)
+
 #define BUTTERFLY_N( i,j,n ) \
 do { \
     v128u16_t v = X(j); \
@@ -248,17 +269,17 @@ do { \
 } while(0)
 
   BUTTERFLY_0( 0, 4 );
-  BUTTERFLY_N( 1, 5, 1 );
-  BUTTERFLY_N( 2, 6, 2 );
-  BUTTERFLY_N( 3, 7, 3 );
+  BUTTERFLY_1( 1, 5 );
+  BUTTERFLY_2( 2, 6 );
+  BUTTERFLY_3( 3, 7 );
 
   DO_REDUCE( 2 );
   DO_REDUCE( 3 );
 
   BUTTERFLY_0( 0, 2 );
   BUTTERFLY_0( 4, 6 );
-  BUTTERFLY_N( 1, 3, 2 );
-  BUTTERFLY_N( 5, 7, 2 );
+  BUTTERFLY_2( 1, 3 );
+  BUTTERFLY_2( 5, 7 );
 
   DO_REDUCE( 1 );
 
@@ -277,6 +298,9 @@ do { \
   DO_REDUCE_FULL_S( 6 );
 
 #undef BUTTERFLY_0
+#undef BUTTERFLY_1
+#undef BUTTERFLY_2
+#undef BUTTERFLY_3
 #undef BUTTERFLY_N
 
   // Multiply by twiddle factors
@@ -328,6 +352,29 @@ do { \
    X(i) = v128_add16( u, X(i) ); \
 } while(0)
 
+#define BUTTERFLY_1( i,j ) \
+do { \
+   v128u16_t u = X(j); \
+   X(i) = v128_sl16( X(i), 2 ); \
+   X(j) = v128_sub16( X(j), X(i) ); \
+   X(i) = v128_add16( u, X(i) ); \
+} while(0)
+
+#define BUTTERFLY_2( i,j ) \
+do { \
+   v128u16_t u = X(j); \
+   X(i) = v128_sl16( X(i), 4 ); \
+   X(j) = v128_sub16( X(j), X(i) ); \
+   X(i) = v128_add16( u, X(i) ); \
+} while(0)
+
+#define BUTTERFLY_3( i,j ) \
+do { \
+   v128u16_t u = X(j); \
+   X(i) = v128_sl16( X(i), 6 ); \
+   X(j) = v128_sub16( X(j), X(i) ); \
+   X(i) = v128_add16( u, X(i) ); \
+} while(0)
 
 #define BUTTERFLY_N( i,j,n ) \
 do { \
@@ -353,15 +400,15 @@ do { \
 
   BUTTERFLY_0( 0, 2 );
   BUTTERFLY_0( 4, 6 );
-  BUTTERFLY_N( 1, 3, 2 );
-  BUTTERFLY_N( 5, 7, 2 );
+  BUTTERFLY_2( 1, 3 );
+  BUTTERFLY_2( 5, 7 );
 
   DO_REDUCE( 3 );
 
   BUTTERFLY_0( 0, 4 );
-  BUTTERFLY_N( 1, 5, 1 );
-  BUTTERFLY_N( 2, 6, 2 );
-  BUTTERFLY_N( 3, 7, 3 );
+  BUTTERFLY_1( 1, 5 );
+  BUTTERFLY_2( 2, 6 );
+  BUTTERFLY_3( 3, 7 );
 
   DO_REDUCE_FULL_S( 0 );
   DO_REDUCE_FULL_S( 1 );
@@ -373,6 +420,9 @@ do { \
   DO_REDUCE_FULL_S( 7 );
 
 #undef BUTTERFLY_0
+#undef BUTTERFLY_1
+#undef BUTTERFLY_2
+#undef BUTTERFLY_3
 #undef BUTTERFLY_N
 #undef DO_REDUCE
 
